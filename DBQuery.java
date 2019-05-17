@@ -1,10 +1,15 @@
+package in.libraries.util;  // Your project namespace
 //import Your database connection class
+import oracle.jdbc.internal.OracleTypes;
 
 import java.security.Timestamp;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 // Created By Naveen Roy : 06-06-2018
 /**
  * Description : Class for create parameters
@@ -80,7 +85,7 @@ public class DBQuery {
 	
 	public DBQuery() {
 		if(con == null)
-		con = DBUtil.getConnection();
+		con = DBUtil.getConnection(); //Call connection from your Database class
 	}
 	
 	public DBQuery(Connection conn) {
@@ -1200,6 +1205,159 @@ public class DBQuery {
 	}
 	
 	
+	 public JSONArray getJson() throws Exception {
+		 JSONArray jsonArray = new JSONArray();
+		 int j=1;
+			try{
+				if(showParameter)
+					System.out.println(FullQuery);
+				
+				pstmt = con.prepareStatement(FullQuery);
+				for(int i=0;i<list.size();i++ ){
+					param = new Parameter();
+					param =list.get(i);
+					if(param.getDataType()=="String"){
+						if(showParameter)
+							System.out.println(j + " : '" + param.getValue()+"'");
+						pstmt.setString(j++,param.getValue());
+						
+					}else if(param.getDataType()=="int"){
+						if(showParameter)
+							System.out.println(j + " : " + param.getValue());
+						pstmt.setInt(j++,Integer.parseInt(param.getValue()));
+					
+					}else if(param.getDataType()=="long"){
+						if(showParameter)
+							System.out.println(j + " : " + param.getValue());
+						pstmt.setLong(j++,Long.parseLong(param.getValue()));
+						
+					}else if(param.getDataType()=="float"){
+						if(showParameter)
+							System.out.println(j + " : " + param.getValue());
+						pstmt.setFloat(j++,Float.parseFloat(param.getValue()));
+					
+					}else if(param.getDataType()=="double"){
+						if(showParameter)
+							System.out.println(j + " : " + param.getValue());
+						pstmt.setDouble(j++,Double.parseDouble(param.getValue()));
+					
+					}else if(param.getDataType()=="time"){	
+						 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
+	    			    java.util.Date parsedDate =  dateFormat.parse(param.getValue());
+	    			    java.sql.Timestamp timestamp = new java.sql.Timestamp(parsedDate.getTime());
+	    			    if(showParameter)
+							System.out.println(j + " : " + timestamp);
+						pstmt.setTimestamp(j++,timestamp);
+					}
+					else if(param.getDataType()=="boolean"){	
+					    if(showParameter)
+							System.out.println(j + " : " + Boolean.valueOf(param.getValue()));
+						pstmt.setBoolean(j++, Boolean.valueOf(param.getValue()));
+					}
+					else{
+						System.out.println("Error Parsing Parameter");
+					}
+				}
+				rs = pstmt.executeQuery();
+			
+		 
+		       
+		        while (rs.next()) {
+		            int total_rows = rs.getMetaData().getColumnCount();
+		            for (int i = 0; i < total_rows; i++) {
+		                JSONObject obj = new JSONObject();
+		                obj.put(rs.getMetaData().getColumnLabel(i + 1)
+		                        .toLowerCase(), rs.getObject(i + 1));
+		                jsonArray.put(obj);
+		            }
+		        }
+			}
+			catch(Exception ex){
+				System.out.println("Error In Query :" + ex.getMessage());
+				System.out.println(FullQuery);
+				throw ex;
+			}
+	        return jsonArray;
+	 }
+	    /**
+	     * Convert a result set into a XML List
+	     * @param resultSet
+	     * @return a XML String with list elements
+	     * @throws Exception if something happens
+	     */
+	    public String getXML()
+	            throws Exception {
+	        StringBuffer xmlArray = new StringBuffer("<results>");
+	        int j=1;
+			try{
+				if(showParameter)
+					System.out.println(FullQuery);
+				
+				pstmt = con.prepareStatement(FullQuery);
+				for(int i=0;i<list.size();i++ ){
+					param = new Parameter();
+					param =list.get(i);
+					if(param.getDataType()=="String"){
+						if(showParameter)
+							System.out.println(j + " : '" + param.getValue()+"'");
+						pstmt.setString(j++,param.getValue());
+						
+					}else if(param.getDataType()=="int"){
+						if(showParameter)
+							System.out.println(j + " : " + param.getValue());
+						pstmt.setInt(j++,Integer.parseInt(param.getValue()));
+					
+					}else if(param.getDataType()=="long"){
+						if(showParameter)
+							System.out.println(j + " : " + param.getValue());
+						pstmt.setLong(j++,Long.parseLong(param.getValue()));
+						
+					}else if(param.getDataType()=="float"){
+						if(showParameter)
+							System.out.println(j + " : " + param.getValue());
+						pstmt.setFloat(j++,Float.parseFloat(param.getValue()));
+					
+					}else if(param.getDataType()=="double"){
+						if(showParameter)
+							System.out.println(j + " : " + param.getValue());
+						pstmt.setDouble(j++,Double.parseDouble(param.getValue()));
+					
+					}else if(param.getDataType()=="time"){	
+						 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
+	    			    java.util.Date parsedDate =  dateFormat.parse(param.getValue());
+	    			    java.sql.Timestamp timestamp = new java.sql.Timestamp(parsedDate.getTime());
+	    			    if(showParameter)
+							System.out.println(j + " : " + timestamp);
+						pstmt.setTimestamp(j++,timestamp);
+					}
+					else if(param.getDataType()=="boolean"){	
+					    if(showParameter)
+							System.out.println(j + " : " + Boolean.valueOf(param.getValue()));
+						pstmt.setBoolean(j++, Boolean.valueOf(param.getValue()));
+					}
+					else{
+						System.out.println("Error Parsing Parameter");
+					}
+				}
+				rs = pstmt.executeQuery();
+		        while (rs.next()) {
+		            int total_rows = rs.getMetaData().getColumnCount();
+		            xmlArray.append("<result ");
+		            for (int i = 0; i < total_rows; i++) {
+		                xmlArray.append(" " + rs.getMetaData().getColumnLabel(i + 1)
+		                .toLowerCase() + "='" + rs.getObject(i + 1) + "'"); }
+		            xmlArray.append(" />");
+		        }
+		        xmlArray.append("</results>");
+			}
+	        catch(Exception ex){
+				System.out.println("Error In Query :" + ex.getMessage());
+				System.out.println(FullQuery);
+				throw ex;
+			}
+	        return xmlArray.toString();
+	    }
+	
 	
 	public DBQuery callSP(String spname,int totalParam) {
 		
@@ -1786,7 +1944,5 @@ public class DBQuery {
 
 	
 }
-
-
 
 
