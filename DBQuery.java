@@ -1,5 +1,4 @@
-package in.gov.cg.fw.util;
-import in.gov.cg.fw.util.DBUtil;
+//import Your database connection class
 
 import java.security.Timestamp;
 import java.sql.*;
@@ -60,7 +59,7 @@ public class DBQuery {
 	
 	
 	public DBQuery() {
-		con = DBUtil.getConnection();
+		con = DBUtil.getConnection(); //Your Database class get connection
 	}
 	
 	public DBQuery(Connection conn) {
